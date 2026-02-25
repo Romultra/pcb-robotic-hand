@@ -1,0 +1,6 @@
+[submodule "thesis"]
+	path = thesis
+	url = https://git@git.overleaf.com/699ef50c29c710333c1e2240
+[submodule "Plan"]
+	path = plan
+	url = https://git@git.overleaf.com/699ef4d329c710333c1dfb33
