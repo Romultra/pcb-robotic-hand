@@ -22,6 +22,10 @@ The root repo contains two **Overleaf git submodules** and reference PDFs:
 
 - `plan/` — Project Definition Report (PDR), due early in the project. Overleaf submodule.
 - `thesis/` — Final BSc thesis. Overleaf submodule. Currently just the DTU LaTeX template.
+- `journal/` — Engineering notebook. Serves as both chronological working notes and organized reference material. Everything research/design related lives here.
+  - `journal/log.md` — Chronological working notes. Supports quick one-liners and longer write-ups.
+  - `journal/topics/` — Deep-dives and reference material organized by topic. Can be anything: subsystem specs, literature reviews, preliminary research, regulatory notes. Create new topic files freely as needed.
+  - `journal/decisions/` — Key design decisions with rationale, alternatives considered, and sources (use `TEMPLATE.md` as starting point).
 - `BSc Project Proposal.pdf` — Original project proposal with background and scope.
 - `Instructions_from_an_Active_Robotic_Hand_Increase_Body_Ownership_and_Task_Clarity.pdf` — Published paper on the robotic hand project as a whole.
 

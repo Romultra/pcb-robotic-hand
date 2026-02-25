@@ -8,6 +8,10 @@ The PCB replaces the existing prototype's Arduino dev-boards and loose wiring, c
 
 - `plan/` — Project Definition Report (LaTeX, Overleaf submodule)
 - `thesis/` — Final thesis (LaTeX, Overleaf submodule)
+- `journal/` — Engineering notebook
+  - `log.md` — Chronological working notes
+  - `topics/` — Deep-dives and reference material organized by topic
+  - `decisions/` — Key design decisions with rationale
 - `BSc Project Proposal.pdf` — Original project proposal
 - `Instructions_from_an_Active_Robotic_Hand_Increase_Body_Ownership_and_Task_Clarity.pdf` — Published paper on the broader robotic hand project
 
