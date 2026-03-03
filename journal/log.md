@@ -30,3 +30,15 @@ without things getting scattered. Considered several approaches:
 - `journal/topics/` — deep-dives and reference material by topic
 - `journal/decisions/` — design decision records
 Updated CLAUDE.md and README.md to reflect the new structure.
+
+## 02-26
+
+### Looked at integrating papis in the workflow
+
+Discovered CLI tool papis for reference management which integrates seamlessly in a terminal heavy git tracked project.
+References are stored in human readable yaml files, which allows for simple git version control.
+Also looked at a papis plugins which links papis to the zotero web scraper browser extension. 
+This link works by running `papis zotero serve`.
+
+Papis is a python package. Therefore I created a .venv to install this tool, and added a requirements.txt file
+I should reference the requirements instalations steps in the readme file of th repo
