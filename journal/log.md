@@ -31,6 +31,11 @@ without things getting scattered. Considered several approaches:
 - `journal/decisions/` — design decision records
 Updated CLAUDE.md and README.md to reflect the new structure.
 
+
+### Looked at EDA tools for PCB design
+
+Looked at KiCad and EasyEDA, I created an account on EasyEDA to test it out. Stopped there.
+
 ## 02-26
 
 ### Looked at integrating papis in the workflow
