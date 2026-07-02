@@ -1,0 +1,236 @@
+:root {
+    --bg: #f7f7f9;
+    --panel: #ffffff;
+    --border: #d6d6dc;
+    --fg: #1a1a1f;
+    --muted: #5f5f6a;
+    --accent: #1e6fdb;
+    --ok: #1b8a3a;
+    --bad: #c0392b;
+    --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg: #0f1115;
+        --panel: #181b22;
+        --border: #2a2f3a;
+        --fg: #ececf0;
+        --muted: #9aa0ad;
+    }
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+header {
+    padding: 12px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 5;
+}
+header h1 { margin: 0 0 8px 0; font-size: 1.2rem; }
+#conn-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+#conn-state {
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.85rem;
+}
+.conn-on  { background: rgba(27, 138, 58, 0.15); color: var(--ok); }
+.conn-off { background: rgba(192, 57, 43, 0.12); color: var(--bad); }
+
+#banner {
+    margin: 10px 12px;
+    padding: 8px 12px;
+    background: rgba(30, 111, 219, 0.08);
+    border-left: 3px solid var(--accent);
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+#banner p { margin: 4px 0; }
+
+main { padding: 0 12px 24px 12px; }
+
+.panel {
+    margin: 12px 0;
+    padding: 10px 14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+.panel summary { cursor: pointer; list-style: none; }
+.panel summary::-webkit-details-marker { display: none; }
+.panel summary h2,
+.panel > h2 {
+    margin: 4px 0;
+    font-size: 1rem;
+    display: inline-block;
+}
+
+.row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 8px 0;
+}
+
+button {
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+button:disabled { background: #888; opacity: 0.6; cursor: not-allowed; }
+
+input[type="number"], input[type="text"], input[type="password"] {
+    padding: 6px 8px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    background: var(--bg);
+    color: var(--fg);
+    width: 110px;
+    font: inherit;
+}
+input[type="text"], input[type="password"] { width: 180px; }
+input[type="color"] {
+    width: 38px;
+    height: 30px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 0;
+}
+
+label { display: inline-flex; gap: 6px; align-items: center; font-size: 0.9rem; color: var(--muted); }
+
+dl { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px; margin: 0; }
+dt { color: var(--muted); }
+dd { margin: 0; font-family: var(--mono); }
+
+.servo-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin: 6px 0;
+}
+.servo-row label { width: 70px; }
+.servo-row input[type="range"] { flex: 1; }
+.servo-row .val { width: 48px; text-align: right; font-family: var(--mono); }
+
+#audio-volume-row label { width: 60px; }
+#audio-volume-row input[type="range"] { flex: 1; }
+#audio-volume-row #audio-volume-value { width: 48px; text-align: right; font-family: var(--mono); }
+
+#log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    margin: 8px 0;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    max-height: 240px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+#sd-result, #sd-upload-result, #wifi-conn-result { font-family: var(--mono); font-size: 0.85rem; padding: 4px 0; }
+
+.hint { display: block; color: var(--muted); font-size: 0.8rem; margin: 2px 0; }
+
+#sd-upload-progress {
+    width: 100%;
+    height: 10px;
+    margin: 4px 0;
+    display: none;
+}
+#sd-upload-progress.active { display: block; }
+input[type="file"] { font: inherit; color: var(--fg); max-width: 220px; }
+
+#wifi-list { font-family: var(--mono); font-size: 0.85rem; padding-left: 20px; }
+#wifi-list li { cursor: pointer; }
+#wifi-list li:hover { color: var(--accent); }
+
+/* --- Hand tracking --------------------------------------------------------- */
+.track-stage {
+    position: relative;
+    width: 100%;
+    max-width: 360px;
+    margin: 8px 0;
+}
+.track-stage video,
+.track-stage canvas {
+    width: 100%;
+    border-radius: 6px;
+    display: block;
+}
+.track-stage video { background: var(--bg); transform: scaleX(-1); }
+.track-stage canvas { position: absolute; inset: 0; transform: scaleX(-1); }
+#track-readout .servo-row progress { flex: 1; height: 14px; }
+.invert-row { display: inline-flex; flex-wrap: wrap; gap: 10px; }
+.invert-row label { width: auto; }
+
+/* --- Finger calibration ---------------------------------------------------- */
+.cal-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 6px 0;
+    padding: 4px 0;
+    border-top: 1px solid var(--border);
+}
+.cal-row .cal-name { width: 60px; }
+.cal-row .cal-cur {
+    width: 56px;
+    text-align: right;
+    font-family: var(--mono);
+    font-weight: 600;
+    color: var(--accent);
+}
+.cal-jog button, .cal-cap button { padding: 4px 8px; font-size: 0.85rem; }
+.cal-band { font-family: var(--mono); font-size: 0.8rem; color: var(--muted); }
+.cal-band.cal-uncal { color: var(--bad); }
+.cal-steps { margin: 6px 0; padding-left: 22px; font-size: 0.82rem; color: var(--muted); }
+.cal-steps li { margin: 3px 0; }
+
+/* Manual Servos panel locked while calibration mode is active. */
+.panel-locked { opacity: 0.5; }
+.lock-tag {
+    margin-left: 8px;
+    padding: 1px 7px;
+    border-radius: 10px;
+    font-size: 0.7rem;
+    font-weight: 400;
+    background: rgba(192, 57, 43, 0.12);
+    color: var(--bad);
+    vertical-align: middle;
+}
+
+/* --- Latency --------------------------------------------------------------- */
+#panel-latency h3 { margin: 12px 0 2px; font-size: 0.95rem; }
+#ping-stats { margin: 6px 0; }
+
+#clip-list { list-style: none; padding: 0; margin: 8px 0; }
+.clip-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin: 4px 0;
+}
+.clip-row .clip-name { font-family: var(--mono); min-width: 90px; }

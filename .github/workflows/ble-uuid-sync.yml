@@ -1,0 +1,31 @@
+name: ble-uuid-sync
+
+# Guard against the duplicated BLE UUIDs in firmware/src/ble.h and
+# webapp/js/ble.js drifting apart (both READMEs say to keep them in sync).
+on:
+  push:
+    paths:
+      - "firmware/src/ble.h"
+      - "webapp/js/ble.js"
+      - "tools/check_ble_uuids.py"
+      - ".github/workflows/ble-uuid-sync.yml"
+  pull_request:
+    paths:
+      - "firmware/src/ble.h"
+      - "webapp/js/ble.js"
+      - "tools/check_ble_uuids.py"
+      - ".github/workflows/ble-uuid-sync.yml"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Check BLE UUID sync
+        run: python tools/check_ble_uuids.py

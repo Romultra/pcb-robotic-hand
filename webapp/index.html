@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PCB1 Validator</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <header>
+        <h1>PCB1 Validator</h1>
+        <div id="conn-bar">
+            <button id="btn-connect">Connect</button>
+            <button id="btn-disconnect" disabled>Disconnect</button>
+            <span id="conn-state" class="conn-off">Disconnected</span>
+        </div>
+    </header>
+
+    <section id="banner">
+        <p><strong>Servos:</strong> require the DC barrel jack. USB-only power
+        will boot the board but the servo rail can't come up.</p>
+        <p><strong>Browser:</strong> this app uses Web Bluetooth — supported on
+        Chrome for Android. iOS Safari and Firefox won't work.</p>
+    </section>
+
+    <main>
+        <section class="panel" id="panel-status">
+            <h2>Status</h2>
+            <dl>
+                <dt>Servo rail</dt><dd id="st-servo-rail">—</dd>
+                <dt>SD card present</dt><dd id="st-sd">—</dd>
+                <dt>Wi-Fi connected</dt><dd id="st-wifi">—</dd>
+                <dt>Uptime</dt><dd id="st-uptime">—</dd>
+                <dt>Free heap</dt><dd id="st-heap">—</dd>
+            </dl>
+        </section>
+
+        <details class="panel" open id="panel-servos">
+            <summary><h2>Servos <span id="servo-locked" class="lock-tag" hidden>locked: calibration mode</span></h2></summary>
+            <div class="row">
+                <button id="btn-servo-on">Power ON</button>
+                <button id="btn-servo-off">Power OFF</button>
+            </div>
+            <div id="servo-sliders"></div>
+            <p class="hint">Sliders are normalized: left = open, right = closed,
+            spanning each finger's calibrated range. Calibrate in the panel below first.</p>
+            <div class="row">
+                <button id="btn-servo-centre-all">All to mid</button>
+                <button id="btn-servo-sweep">Sweep open→closed</button>
+            </div>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Finger Calibration</h2></summary>
+            <p class="hint">
+                Learns each finger's safe travel and stores it on the board (NVS);
+                the firmware then clamps every command to it. Servos hold an
+                absolute position, so once set these values stay valid across power
+                cycles as long as the ropes aren't moved. Needs the DC barrel jack.
+            </p>
+            <ol class="cal-steps">
+                <li>Press <strong>Power ON</strong>.</li>
+                <li>Tick <strong>Calibration mode</strong>: this takes control here, removes the safe limits so you can jog freely, and locks the Servos panel above.</li>
+                <li>Rope slack: jog each finger to its motor end-stops (the “seen” range fills in).</li>
+                <li>Rope on: jog to the safe most-open pose then <strong>Set OPEN</strong>; to the safe most-closed pose then <strong>Set CLOSED</strong>.</li>
+                <li><strong>Save to board</strong>, then untick Calibration mode to enforce the limits and hand control back. <strong>Power OFF</strong> is the emergency stop.</li>
+            </ol>
+            <div class="row">
+                <button id="btn-cal-power-on">Power ON</button>
+                <button id="btn-cal-power-off">Power OFF (stop)</button>
+                <label><input type="checkbox" id="cal-mode" /> Calibration mode (control here, limits off)</label>
+            </div>
+            <div id="cal-rows"></div>
+            <div class="row">
+                <button id="btn-cal-open-all">Move all to open</button>
+                <button id="btn-cal-read">Read from board</button>
+                <button id="btn-cal-save">Save to board</button>
+                <button id="btn-cal-reset">Reset</button>
+            </div>
+            <small id="cal-status" class="hint">—</small>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Hand Tracking</h2></summary>
+            <div class="track-stage">
+                <video id="track-video" playsinline muted></video>
+                <canvas id="track-canvas"></canvas>
+            </div>
+            <div class="row">
+                <button id="btn-track-start">Start camera</button>
+                <button id="btn-track-stop" disabled>Stop camera</button>
+                <label><input type="checkbox" id="track-mirror" /> Live mirror → board</label>
+            </div>
+            <div id="track-readout"></div>
+            <div class="row">
+                <button id="btn-calib-open">Capture open</button>
+                <button id="btn-calib-closed">Capture closed</button>
+                <button id="btn-calib-reset">Reset calib</button>
+            </div>
+            <div class="row">
+                <span class="hint">Invert:</span>
+                <span id="track-invert" class="invert-row"></span>
+            </div>
+            <div class="row">
+                <label>Name <input type="text" id="record-name" placeholder="clip name" /></label>
+                <button id="btn-record">Record</button>
+                <button id="btn-record-stop" disabled>Stop rec</button>
+            </div>
+            <small id="track-status" class="hint">—</small>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Hand Playback</h2></summary>
+            <ul id="clip-list"></ul>
+            <div class="row">
+                <button id="btn-playback-stop" disabled>Stop</button>
+                <label>Import <input type="file" id="clip-import" accept=".json,application/json" /></label>
+            </div>
+            <small id="playback-status" class="hint">—</small>
+        </details>
+
+        <details class="panel" id="panel-latency">
+            <summary><h2>Latency</h2></summary>
+
+            <h3>Bluetooth round-trip</h3>
+            <p class="hint">Pings the board's echo characteristic and times the
+            round trip. Mostly set by the BLE connection interval. Needs a
+            connection.</p>
+            <div class="row">
+                <label>Count <input type="number" id="ping-count" value="50" min="1" max="1000" step="10" /></label>
+                <label>Payload <input type="number" id="ping-size" value="8" min="2" max="240" step="1" /> B</label>
+                <label>Gap <input type="number" id="ping-gap" value="0" min="0" max="1000" step="10" /> ms</label>
+            </div>
+            <div class="row">
+                <button id="btn-ping-run">Run ping test (echo)</button>
+                <button id="btn-ping-wr">Compare: write-ack RTT</button>
+                <button id="btn-ping-csv">Copy CSV</button>
+            </div>
+            <dl id="ping-stats">
+                <dt>Mode</dt><dd id="lat-mode">—</dd>
+                <dt>Samples</dt><dd id="lat-n">—</dd>
+                <dt>Min</dt><dd id="lat-min">—</dd>
+                <dt>Median</dt><dd id="lat-median">—</dd>
+                <dt>Average</dt><dd id="lat-avg">—</dd>
+                <dt>p95</dt><dd id="lat-p95">—</dd>
+                <dt>Max</dt><dd id="lat-max">—</dd>
+                <dt>Jitter (σ)</dt><dd id="lat-std">—</dd>
+                <dt>Drops</dt><dd id="lat-drops">—</dd>
+            </dl>
+            <small id="ping-status" class="hint">—</small>
+
+            <h3>Wi-Fi round-trip</h3>
+            <p class="hint">Times an HTTP round trip to the board over Wi-Fi, to
+            compare against the Bluetooth figure above (motor commands themselves
+            always go over BLE). Connect the board to Wi-Fi first (Wi-Fi panel).
+            Uses the Count and Gap above; payload size doesn't apply. Results show
+            in the same table (mode = wifi).</p>
+            <div class="row">
+                <button id="btn-ping-wifi">Run Wi-Fi test</button>
+            </div>
+
+            <h3>Hand-tracking inference</h3>
+            <p class="hint">MediaPipe time per frame while the Hand Tracking camera
+            runs. Software only — true glass-to-motion also includes camera
+            exposure, display, BLE and servo travel.</p>
+            <dl>
+                <dt>Last</dt><dd id="trk-last">—</dd>
+                <dt>Average</dt><dd id="trk-avg">—</dd>
+                <dt>Max</dt><dd id="trk-max">—</dd>
+                <dt>Frame rate</dt><dd id="trk-fps">—</dd>
+            </dl>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Buzzer</h2></summary>
+            <div class="row">
+                <label>Freq <input type="number" id="buz-freq" value="2700" min="50" max="10000" step="50" /> Hz</label>
+                <label>Duration <input type="number" id="buz-dur" value="200" min="10" max="5000" step="10" /> ms</label>
+                <button id="btn-buzzer-fire">Beep</button>
+                <button id="btn-buzzer-stop">Stop</button>
+            </div>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Audio</h2></summary>
+            <div class="row">
+                <button data-preset="1">1 kHz sine</button>
+                <button data-preset="2">Chirp</button>
+                <button data-preset="3">Success jingle</button>
+                <button data-preset="4">Fail tone</button>
+                <button data-preset="0">Silence</button>
+            </div>
+
+            <div class="row" id="audio-volume-row">
+                <label for="audio-volume">Volume</label>
+                <input type="range" id="audio-volume" min="0" max="100" step="1" value="100">
+                <span id="audio-volume-value">100%</span>
+            </div>
+            <small class="hint">Scales the audio digitally (the amp has fixed gain).
+            Saved on the board and restored after a reboot.</small>
+
+            <h3>SD audio files (<code>/audio</code>)</h3>
+            <p class="hint">Plays 16-bit PCM WAV files from the card's
+            <code>/audio</code> folder only. Upload files there via the microSD
+            panel using a path like <code>/audio/clip.wav</code>.</p>
+            <div class="row">
+                <button id="btn-audio-list">List files</button>
+                <button id="btn-audio-stop">Stop</button>
+            </div>
+            <ul id="audio-file-list"></ul>
+            <small id="audio-file-status" class="hint">—</small>
+        </details>
+
+        <details class="panel">
+            <summary><h2>microSD</h2></summary>
+            <div class="row">
+                <button id="btn-sd-test">Run self-test</button>
+            </div>
+            <div id="sd-result">—</div>
+
+            <div class="row">
+                <label>File <input type="file" id="sd-upload-file" /></label>
+                <label>Path <input type="text" id="sd-upload-path" placeholder="/upload.bin" /></label>
+                <button id="btn-sd-upload">Upload</button>
+                <button id="btn-sd-upload-cancel" disabled>Cancel</button>
+            </div>
+            <small id="sd-upload-hint" class="hint">—</small>
+            <progress id="sd-upload-progress" value="0" max="100"></progress>
+            <div id="sd-upload-result">—</div>
+        </details>
+
+        <details class="panel">
+            <summary><h2>Wi-Fi</h2></summary>
+            <div class="row">
+                <button id="btn-wifi-scan">Scan networks</button>
+            </div>
+            <ul id="wifi-list"></ul>
+            <div class="row">
+                <label>SSID <input type="text" id="wifi-ssid" /></label>
+                <label>Password <input type="password" id="wifi-pw" /></label>
+                <button id="btn-wifi-connect">Connect</button>
+                <button id="btn-wifi-reconnect">Reconnect saved</button>
+                <button id="btn-wifi-disconnect">Disconnect</button>
+            </div>
+            <p class="hint">The board saves the last network it joined. "Reconnect
+            saved" rejoins it without re-entering the password.</p>
+            <div id="wifi-conn-result">—</div>
+        </details>
+
+        <details class="panel" open>
+            <summary><h2>Log</h2></summary>
+            <pre id="log"></pre>
+            <button id="btn-clear-log">Clear</button>
+        </details>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

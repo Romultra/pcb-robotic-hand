@@ -1,0 +1,7 @@
+# binary assets: no end-of-line conversion
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.zip binary
+*.xlsx binary

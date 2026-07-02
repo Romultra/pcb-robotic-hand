@@ -1,0 +1,13 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+
+# PlatformIO / build artifacts
+.pio/
+
+# Editor / OS
+*.code-workspace
+.vscode/
+.DS_Store
+Thumbs.db
